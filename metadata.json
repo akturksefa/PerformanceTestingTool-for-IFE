@@ -1,6 +1,6 @@
 {
-  "name": "LoadPulse",
-  "description": "Professional-grade endpoint performance testing tool with concurrent request simulation and metrics analysis.",
+  "name": "IFE Performance Test Tool",
+  "description": "Professional-grade In-Flight Entertainment (IFE) endpoint performance testing tool with concurrent request simulation, dynamic seat mapping, and metrics analysis.",
   "requestFramePermissions": [],
   "majorCapabilities": []
 }

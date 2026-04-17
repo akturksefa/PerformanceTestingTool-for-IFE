@@ -31,6 +31,7 @@ export default function App() {
   const [url, setUrl] = useState('https://jsonplaceholder.typicode.com/posts/1');
   const [method, setMethod] = useState<'GET' | 'POST' | 'PUT' | 'DELETE'>('GET');
   const [concurrency, setConcurrency] = useState(10);
+  const [interval, setInterval] = useState(0); // ms between requests
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState<TestResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -76,7 +77,8 @@ export default function App() {
           method,
           count: concurrency,
           body: parsedBody,
-          dynamicSeats
+          dynamicSeats,
+          interval
         }),
       });
 
@@ -107,7 +109,7 @@ export default function App() {
       {/* Header */}
       <header className="flex justify-between items-center shrink-0">
         <div className="flex items-center gap-2 text-white font-extrabold text-xl tracking-tight">
-          LOADPULSE <span className="bg-[#58A6FF] text-[#0A0C10] text-xs px-1.5 py-0.5 rounded font-bold">PRO</span>
+          IFE <span className="text-[#58A6FF]">TESTER</span> <span className="bg-[#58A6FF] text-[#0A0C10] text-xs px-1.5 py-0.5 rounded font-bold">PRO</span>
         </div>
         <div className="text-sm text-[#8B949E] font-medium flex items-center gap-2">
           {loading ? (
@@ -116,7 +118,7 @@ export default function App() {
               RUNNING TEST...
             </span>
           ) : (
-            <>Session ID: <span className="text-white font-mono opacity-80 cursor-default">#LP-{Date.now().toString().slice(-5)}</span></>
+            <>Session ID: <span className="text-white font-mono opacity-80 cursor-default">#IFE-{Date.now().toString().slice(-5)}</span></>
           )}
         </div>
       </header>
@@ -163,6 +165,23 @@ export default function App() {
               </div>
             </div>
 
+            <div className="space-y-2">
+              <label className="block text-[13px] text-[#8B949E]">Request Interval (ms)</label>
+              <div className="flex items-center gap-4">
+                <input 
+                  type="range" 
+                  min="0" 
+                  max="1000" 
+                  step="10"
+                  value={interval}
+                  onChange={(e) => setInterval(parseInt(e.target.value))}
+                  className="flex-grow accent-[#58A6FF] h-1.5 bg-[#0A0C10] rounded-lg cursor-pointer"
+                />
+                <span className="bg-[#0A0C10] border border-[#30363D] px-2 py-1 rounded font-mono text-sm text-[#58A6FF] min-w-[50px] text-center">
+                  {interval}
+                </span>
+              </div>
+            </div>
             <div className="space-y-2 pt-2">
               <div className="flex justify-between text-[11px] text-[#8B949E] font-bold uppercase tracking-widest opacity-60">
                 <span>Method</span>

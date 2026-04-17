@@ -14,6 +14,7 @@ export interface IndividualResult {
   duration: number;
   success: boolean;
   error?: string;
+  data?: any;
 }
 
 export interface TestResponse {

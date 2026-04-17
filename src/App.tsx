@@ -13,7 +13,10 @@ import {
   CheckCircle2,
   XCircle,
   Database,
-  Terminal
+  Terminal,
+  X,
+  ChevronRight,
+  Eye
 } from 'lucide-react';
 import { 
   XAxis, 
@@ -35,6 +38,7 @@ export default function App() {
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState<TestResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [selectedResult, setSelectedResult] = useState<IndividualResult | null>(null);
   const [dynamicSeats, setDynamicSeats] = useState(false);
   const [payload, setPayload] = useState(JSON.stringify({
     "seatId": "E",
@@ -380,8 +384,15 @@ export default function App() {
               </thead>
               <tbody className="divide-y divide-[#30363D]">
                 {data ? data.results.map((result, idx) => (
-                  <tr key={idx} className="hover:bg-[#0A0C10]/40 transition-colors group">
-                    <td className="px-6 py-2.5 text-[11px] font-mono opacity-60 group-hover:opacity-100 uppercase">req_{Math.random().toString(36).substring(2, 7)}</td>
+                  <tr 
+                    key={idx} 
+                    onClick={() => setSelectedResult(result)}
+                    className="hover:bg-[#58A6FF]/5 cursor-pointer transition-colors group"
+                  >
+                    <td className="px-6 py-2.5 text-[11px] font-mono opacity-60 group-hover:opacity-100 uppercase flex items-center gap-2">
+                      <span className="opacity-40">{idx + 1}.</span>
+                      req_{Math.random().toString(36).substring(2, 7)}
+                    </td>
                     <td className="px-6 py-2.5">
                       <span className={cn(
                         "px-2 py-0.5 rounded-full text-[11px] font-semibold border",
@@ -396,17 +407,20 @@ export default function App() {
                       {result.duration.toFixed(0)}<span className="opacity-40 text-[10px] ml-0.5">ms</span>
                     </td>
                     <td className="px-6 py-2.5">
-                      {result.success ? (
-                        <div className="flex items-center gap-1.5 text-[#3FB950]">
-                          <CheckCircle2 size={12} />
-                          <span className="text-[10px] font-bold uppercase opacity-80 underline underline-offset-4 decoration-[#3FB950]/30">Pass</span>
-                        </div>
-                      ) : (
-                        <div className="flex items-center gap-1.5 text-[#F85149]">
-                          <XCircle size={12} />
-                          <span className="text-[10px] font-bold uppercase opacity-80 underline underline-offset-4 decoration-[#F85149]/30">Fail</span>
-                        </div>
-                      )}
+                      <div className="flex justify-between items-center pr-4">
+                        {result.success ? (
+                          <div className="flex items-center gap-1.5 text-[#3FB950]">
+                            <CheckCircle2 size={12} />
+                            <span className="text-[10px] font-bold uppercase opacity-80 underline underline-offset-4 decoration-[#3FB950]/30">Pass</span>
+                          </div>
+                        ) : (
+                          <div className="flex items-center gap-1.5 text-[#F85149]">
+                            <XCircle size={12} />
+                            <span className="text-[10px] font-bold uppercase opacity-80 underline underline-offset-4 decoration-[#F85149]/30">Fail</span>
+                          </div>
+                        )}
+                        <Eye size={12} className="text-[#8B949E] opacity-0 group-hover:opacity-100 transition-opacity" />
+                      </div>
                     </td>
                   </tr>
                 )) : (
@@ -431,6 +445,92 @@ export default function App() {
           {error}
         </div>
       )}
+      {/* Response Inspection Modal */}
+      <AnimatePresence>
+        {selectedResult && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setSelectedResult(null)}
+              className="absolute inset-0 bg-[#0A0C10]/80 backdrop-blur-sm"
+            />
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="relative w-full max-w-2xl bg-[#161B22] border border-[#30363D] rounded-xl shadow-2xl overflow-hidden flex flex-col max-h-[80vh]"
+            >
+              <div className="p-4 border-b border-[#30363D] flex justify-between items-center bg-[#0A0C10]/20">
+                <div className="flex items-center gap-3">
+                  <div className={cn(
+                    "w-2 h-2 rounded-full",
+                    selectedResult.success ? "bg-[#3FB950]" : "bg-[#F85149]"
+                  )} />
+                  <h3 className="text-white font-bold text-sm uppercase tracking-widest">
+                    Response Inspector
+                  </h3>
+                  <span className="text-[10px] font-mono text-[#8B949E] bg-[#0A0C10] px-2 py-0.5 rounded border border-[#30363D]">
+                    {selectedResult.status || 'TIMEOUT'}
+                  </span>
+                </div>
+                <button 
+                  onClick={() => setSelectedResult(null)}
+                  className="text-[#8B949E] hover:text-white transition-colors"
+                >
+                  <X size={20} />
+                </button>
+              </div>
+
+              <div className="p-6 overflow-y-auto custom-scrollbar">
+                <div className="space-y-6">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="bg-[#0A0C10] p-3 rounded border border-[#30363D]">
+                      <p className="text-[10px] text-[#8B949E] uppercase font-bold mb-1">Latency</p>
+                      <p className="text-white font-mono text-lg">{selectedResult.duration.toFixed(2)}ms</p>
+                    </div>
+                    <div className="bg-[#0A0C10] p-3 rounded border border-[#30363D]">
+                      <p className="text-[10px] text-[#8B949E] uppercase font-bold mb-1">Status</p>
+                      <p className={cn(
+                        "font-mono text-lg",
+                        selectedResult.success ? "text-[#3FB950]" : "text-[#F85149]"
+                      )}>
+                        {selectedResult.status || 'FAILED'}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <p className="text-[11px] text-[#8B949E] uppercase font-bold flex items-center gap-2">
+                      <Terminal size={12} />
+                      Response Body
+                    </p>
+                    <pre className="w-full bg-[#0A0C10] border border-[#30363D] rounded-lg p-4 text-[12px] font-mono text-[#C9D1D9] overflow-x-auto selection:bg-[#58A6FF]/30">
+                      {selectedResult.error ? (
+                        <span className="text-[#F85149] italic">{selectedResult.error}</span>
+                      ) : (
+                        typeof selectedResult.data === 'object' 
+                          ? JSON.stringify(selectedResult.data, null, 2) 
+                          : (selectedResult.data || 'No response body returned')
+                      )}
+                    </pre>
+                  </div>
+                </div>
+              </div>
+
+              <div className="p-4 border-t border-[#30363D] bg-[#0A0C10]/20 flex justify-end">
+                <button 
+                  onClick={() => setSelectedResult(null)}
+                  className="px-4 py-2 bg-[#30363D] hover:bg-[#30363D]/80 text-white text-xs font-bold rounded transition-all uppercase tracking-widest"
+                >
+                  Close
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

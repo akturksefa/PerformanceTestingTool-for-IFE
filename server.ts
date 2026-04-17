@@ -80,10 +80,27 @@ async function startServer() {
               signal: AbortSignal.timeout(10000)
             });
             const reqEnd = performance.now();
+            
+            let responseData: any = null;
+            try {
+              const contentType = response.headers.get('content-type');
+              if (contentType && contentType.includes('application/json')) {
+                responseData = await response.json();
+              } else {
+                responseData = await response.text();
+                if (typeof responseData === 'string' && responseData.length > 2000) {
+                  responseData = responseData.substring(0, 2000) + '... [truncated]';
+                }
+              }
+            } catch (e) {
+              responseData = '[Error parsing response body]';
+            }
+
             return {
               status: response.status,
               duration: reqEnd - reqStart,
-              success: response.ok
+              success: response.ok,
+              data: responseData
             };
           } catch (error: any) {
             const reqEnd = performance.now();
